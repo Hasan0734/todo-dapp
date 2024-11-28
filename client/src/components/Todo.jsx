@@ -16,7 +16,7 @@ const Todo = ({todo}) => {
         <label
           htmlFor={`todo-${todo.id}`}
           className={`ml-3 text-sm font-medium line-clamp-1 ${
-            todo.completed ? "line-through text-gray-500" : "text-gray-700"
+            todo.completed ? "line-through text-gray-500" : "text-card-foreground"
           }`}
         >
           {todo.text}
