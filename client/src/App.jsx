@@ -1,30 +1,34 @@
-import { Plus } from "lucide-react";
 import { ThemeProvider } from "./components/theme-provide";
-import { Button } from "./components/ui/button";
 import { Card } from "./components/ui/card";
-import { Input } from "./components/ui/input";
 import Todo from "./components/Todo";
-import { useState } from "react";
 import { useAccount } from "wagmi";
 
-function App() {
-  const { address } = useAccount();
+import AddTodo from "./components/AddTodo";
 
-  const [todos, setTodos] = useState([
-    { id: 1, text: "Learn React", completed: false },
-    { id: 2, text: "Build a todo app", completed: true },
-    {
-      id: 3,
-      text: "Deploy to production fsd fsdf sfsdf sf sdfsfsdfds fsf ss sd fsdfsdfsdf sdf  sdfsdfdsfsdf saf sdfs sdf skjf skdf jslflsdfl slfsdfjlsdfjljsaflaflsdklfj fjldjfl jsdlf sfsfsd",
-      completed: false,
-    },
-  ]);
-console.log(address)
+import { useReadTodo } from "./hooks/useTodo";
+import { Loader2 } from "lucide-react";
+import { Button } from "./components/ui/button";
+
+function App() {
+  const { status } = useAccount();
+
+  const { data: todos, isPending, refetch } = useReadTodo("getTodos");
+
+  if (status === "connecting") {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex items-center gap-1">
+          <Loader2 className="animate-spin" /> Connecting...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <div className="min-h-[90vh] flex items-center justify-center p-4">
-          {address ? (
+          {status === "connected" && (
             <Card className="min-w-[600px] max-w-2xl py-10 px-10 rounded-lg  bg-card text-card-foreground space-y-10">
               <div>
                 <h2 className="text-center text-3xl font-extrabold">
@@ -32,27 +36,36 @@ console.log(address)
                 </h2>
               </div>
 
-              <div className="flex items-center">
-                <Input
-                  type="text"
-                  // value={newTodo}
-                  // onChange={(e) => setNewTodo(e.target.value)}
-                  placeholder="Add a new todo"
-                  className="flex-grow mr-2 py-5 rounded-lg"
-                />
-                <Button className="py-5 rounded-lg">
-                  <Plus className="h-5 w-5" />
-                  <span className="sr-only">Add Todo</span>
-                </Button>
-              </div>
+              <AddTodo refetch={refetch} />
 
-              <ul className="space-y-3">
-                {todos.map((todo) => (
-                  <Todo todo={todo} />
-                ))}
-              </ul>
+              {isPending ? (
+                <div className="mt-4 flex justify-center">
+                  <Button variant="ghost">
+                    <Loader2 className="animate-spin" /> Loading
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  {todos?.length > 0 && (
+                    <ul className="space-y-3">
+                      {[...todos]?.reverse().map((todo) => (
+                        <Todo
+                          todo={todo}
+                          key={Number(todo.id)}
+                          refetch={refetch}
+                        />
+                      ))}
+                    </ul>
+                  )}
+
+                  {!todos?.length && (
+                    <p className="text-center mt-4">Not found todo!</p>
+                  )}
+                </>
+              )}
             </Card>
-          ) : (
+          )}
+          {status === "disconnected" && (
             <div>
               <h1 className="text-center text-2xl font-bold">
                 Welcome to our Todo DAAP
