@@ -48,11 +48,13 @@ contract TodoList {
 
     function updateTodo(uint256 _id, string memory _text) external {
         (, uint256 index) = getTodoById(_id);
-
+        
         todos[index].text = _text;
         todos[index].updated = block.timestamp;
+        todos[index].completed = false;
         emit UpdateEvent(nextId, msg.sender, _text, block.timestamp);
     }
+
 
     function getTodos() public view returns (Todo[] memory) {
         uint256 count = 0;
