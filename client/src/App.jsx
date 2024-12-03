@@ -2,15 +2,16 @@ import { ThemeProvider } from "./components/theme-provide";
 import { Card } from "./components/ui/card";
 import Todo from "./components/Todo";
 import { useAccount } from "wagmi";
-
 import AddTodo from "./components/AddTodo";
 
 import { useReadTodo } from "./hooks/useTodo";
 import { Loader2 } from "lucide-react";
 import { Button } from "./components/ui/button";
+import { getAddress } from 'viem'
 
 function App() {
   const { status } = useAccount();
+
 
   const { data: todos, isPending, refetch } = useReadTodo("getTodos");
 
@@ -28,6 +29,8 @@ function App() {
     <>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <div className="min-h-[90vh] flex items-center justify-center p-4">
+
+
           {status === "connected" && (
             <Card className="min-w-[600px] max-w-2xl py-10 px-10 rounded-lg  bg-card text-card-foreground space-y-10">
               <div>

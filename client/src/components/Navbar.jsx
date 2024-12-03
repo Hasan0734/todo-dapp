@@ -24,10 +24,15 @@ const Navbar = () => {
         <a href="/" className="text-xl font-semibold uppercase">
           Smart Todo
         </a>
+        <a className="text-lg" href="/transactions">Transactions</a>
         <div className="flex items-center gap-3">
-        <ConnectButton showBalance={false} chainStatus="none" />
-          <Button onClick={handleTheme} variant="outline" className="rounded-xl shadow-md">
-            {theme === "light" ? <Moon size={30}/> : <Sun size={30} />}
+          <ConnectButton showBalance={false} chainStatus="none" />
+          <Button
+            onClick={handleTheme}
+            variant="outline"
+            className="rounded-xl shadow-md"
+          >
+            {theme === "light" ? <Moon size={30} /> : <Sun size={30} />}
           </Button>
         </div>
       </div>

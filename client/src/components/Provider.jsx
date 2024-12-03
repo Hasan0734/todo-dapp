@@ -1,20 +1,21 @@
 import React from "react";
-import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import {
+  RainbowKitProvider,
+} from "@rainbow-me/rainbowkit";
 import { WagmiProvider } from "wagmi";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import wagmiConfig from "../config/wagmiConfig";
 
-
-const Provider = ({children}) => {
+const Provider = ({ children }) => {
   const queryClient = new QueryClient();
 
   return (
     <>
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
-          <RainbowKitProvider>
-            {children}
-          </RainbowKitProvider>
+
+            <RainbowKitProvider>{children}</RainbowKitProvider>
+     
         </QueryClientProvider>
       </WagmiProvider>
     </>

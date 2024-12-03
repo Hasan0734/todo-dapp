@@ -3,18 +3,22 @@ import { Button } from "./ui/button";
 import { Plus } from "lucide-react";
 import { Input } from "./ui/input";
 import { useWriteTodo } from "@/hooks/useTodo";
+import { useAddRecentTransaction } from "@rainbow-me/rainbowkit";
+
 
 const AddTodo = ({ refetch }) => {
   const [newTodo, setNewTodo] = useState("");
+  const {write, isPending } = useWriteTodo();
 
-  const { write, isPending } = useWriteTodo();
+
 
   const addNewTodo = async () => {
     if (!newTodo) return;
-    await write("createTodo", [newTodo], "Added new todo.");
+    const res = await write("createTodo", [newTodo], "Added new todo.");
     setNewTodo("");
     refetch();
   };
+
 
   return (
     <>

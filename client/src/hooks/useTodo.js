@@ -1,6 +1,6 @@
 import { contractConfig } from "@/lib/contractConfig";
 import wagmiConfig from "../config/wagmiConfig";
-import { useAccount, useReadContract, useWriteContract } from "wagmi";
+import { useAccount, useReadContract, useTransactionReceipt, useWriteContract } from "wagmi";
 import toast from "react-hot-toast";
 
 export const useReadTodo = (functionName, args = []) => {
@@ -17,7 +17,7 @@ export const useReadTodo = (functionName, args = []) => {
 };
 
 export const useWriteTodo = () => {
-  const { writeContractAsync, writeContract, ...rest } = useWriteContract({
+  const {data, writeContractAsync, writeContract, ...rest } = useWriteContract({
     config: wagmiConfig,
     mutation: {
       onError: (e) => {
@@ -45,5 +45,9 @@ export const useWriteTodo = () => {
     }
   };
 
-  return { write, ...rest };
+  const {data:transaction} = useTransactionReceipt({
+    hash: data,
+  })
+
+  return { hash: data, write, transaction, ...rest };
 };
