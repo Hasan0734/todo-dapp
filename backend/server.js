@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const app = require("./app");
 require("dotenv").config();
 
+
 //database connection
 mongoose.connect(process.env.DATABASE, {
 //   useNewUrlParser: true,

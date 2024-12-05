@@ -2,11 +2,10 @@ import React from "react";
 import { Button } from "./ui/button";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "./theme-provide";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import SignInButton from "./SignInButton";
 
 const Navbar = () => {
   const { theme, setTheme } = useTheme();
-
   const handleTheme = () => {
     if (theme === "dark") {
       setTheme("light");
@@ -24,9 +23,11 @@ const Navbar = () => {
         <a href="/" className="text-xl font-semibold uppercase">
           Smart Todo
         </a>
-        <a className="text-lg" href="/transactions">Transactions</a>
+        <a className="text-lg" href="/transactions">
+          Transactions
+        </a>
         <div className="flex items-center gap-3">
-          <ConnectButton showBalance={false} chainStatus="none" />
+          <SignInButton />
           <Button
             onClick={handleTheme}
             variant="outline"
