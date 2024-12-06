@@ -19,7 +19,7 @@ export const handleTransaction = async (transaction) => {
     functionName: transaction?.funcName,
   };
 
-  console.log(txData)
+
   const res = await fetch(`${baseAPI}/transactions`, {
     method: "POST",
     body: JSON.stringify(txData),

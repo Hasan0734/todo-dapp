@@ -24,19 +24,14 @@ const AddTodo = ({ refetch }) => {
 
   useEffect(() => {
     if (newHash && transaction?.transactionHash) {
-
-      console.log({transaction})
-
-      const res = handleTransaction({
+      handleTransaction({
         ...transaction,
         dataUpdatedAt,
         funcName: "createTodo",
       });
-      console.log({ res });
     }
   }, [newHash, transaction?.transactionHash]);
 
-  console.log({transaction, newHash, hash, dataUpdatedAt });
 
   return (
     <>

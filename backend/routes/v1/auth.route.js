@@ -6,7 +6,10 @@ router.post("/nonce", getNonce);
 router.post("/verify", getVerify);
 
 router.get("/me", (req, res) => {
-  res.send({ address: req.session.siwe?.data.address });
+  if (req.session.siwe?.data.address) {
+    res.send({ address: req.session.siwe?.data.address, success: true });
+  }
+  res.status(401).json({ success: false });
 });
 
 router.get("/logout", (req, res) => {

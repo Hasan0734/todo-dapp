@@ -11,32 +11,52 @@ import { ScrollArea } from "./components/ui/scroll-area";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "./components/ui/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "./components/ui/input";
 
 function App() {
   const { status } = useAccount();
-  const { data: todos, isPending, refetch } = useReadTodo("getTodos");
+  const {
+    data: todos,
+    isPending,
+    refetch,
+    isRefetching,
+  } = useReadTodo("getTodos");
   const { loading, auth } = useSessionStore((state) => state);
   const [selected, setSelected] = useState("All");
-  const [filtered, setFiltered] = useState(todos || []);
+  const [filtered, setFiltered] = useState(todos);
+
+  useEffect(() => {
+    if (!isPending || isRefetching) {
+      setFiltered(todos);
+    }
+  }, [!isPending, isRefetching]);
 
   const handleSelect = (value) => {
     setSelected(value);
 
     if (value === "All") {
-      console.log(value);
       setFiltered(todos);
       return;
     }
     const filter = todos.filter((todo) => todo.completed === value);
     setFiltered(filter);
+  };
+
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    if (!value) {
+      handleSelect(selected);
+      return;
+    }
+    const searchItems = filtered.filter((todo) =>
+      todo.text.toLowerCase().includes(value.toLowerCase())
+    );
+    setFiltered(searchItems);
   };
 
   if (status === "connecting") {
@@ -48,6 +68,7 @@ function App() {
       </div>
     );
   }
+
   return (
     <>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -83,9 +104,8 @@ function App() {
                       </div>
                       <Input
                         type="text"
-                        value={""}
-                        onChange={(e) => console.log(e)}
-                        placeholder="Add a new todo"
+                        onChange={handleSearch}
+                        placeholder="Search todo"
                         className=" rounded-full"
                       />
                       <Select

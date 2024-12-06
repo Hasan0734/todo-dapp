@@ -8,7 +8,6 @@ import toast from "react-hot-toast";
 
 import { useSessionStore } from "@/store";
 
-
 const SignInButton = () => {
   const { openConnectModal } = useConnectModal();
   const { address, isConnected, isDisconnected } = useAccount();
@@ -32,9 +31,6 @@ const SignInButton = () => {
     }
   }, [isConnected, !storeNonce, !auth]);
 
-
-  console.log(isConnected && !storeNonce && !auth)
-
   useEffect(() => {
     if (isDisconnected && Boolean(auth) && Boolean(storeNonce)) {
       handleLogOut();
@@ -50,17 +46,25 @@ const SignInButton = () => {
           credentials: "include",
         });
         const json = await res.json();
+        if (!json.success) {
+          // await disconnectAsync();
+          setAuth(null);
+          setNonce(null);
+          await disconnectAsync();
+          return;
+        }
         setAuth(json.address);
-        setNonce(null)
-      } catch (_error) {}
+        setNonce(null);
+      } catch (_error) {
+        console.log(_error);
+      }
     };
-    // 1. page loads
-    handler();
 
-    // 2. window is focused (in case user logs out of another window)
-    window.addEventListener("focus", handler);
-    return () => window.removeEventListener("focus", handler);
-  }, []);
+    if (address) {
+      handler();
+    }
+  }, [address, storeNonce]);
+
 
   const handleLogOut = async () => {
     await fetch(`${baseAPI}/auth/logout`, {
@@ -72,7 +76,7 @@ const SignInButton = () => {
     });
 
     await disconnectAsync();
-    +setNonce(null);
+    setNonce(null);
     setAuth(null);
     setLoading(false);
     setError(null);
@@ -90,9 +94,7 @@ const SignInButton = () => {
       });
 
       const nonce = await res.text();
-      console.log({nonce})
       setNonce(nonce);
-
       const message = new SiweMessage({
         domain: window.location.host,
         address,
@@ -148,7 +150,6 @@ const SignInButton = () => {
 
       setLoading(false);
       setAuth(address);
-      // onSuccess({ address })
     } catch (error) {
       console.error(error.message);
       toast.error(error.message);

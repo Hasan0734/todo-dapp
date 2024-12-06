@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Checkbox } from "./ui/checkbox";
 import { Button } from "./ui/button";
 import { Loader2, SquarePen, Trash2 } from "lucide-react";
@@ -7,16 +7,60 @@ import { format, fromUnixTime } from "date-fns";
 import { useWriteTodo } from "@/hooks/useTodo";
 import { Dialog, DialogTrigger } from "./ui/dialog";
 import { UpdateTodo } from "./UpdateTodo";
+import { useTransactionReceipt } from "wagmi";
+import { handleTransaction } from "@/lib/utils";
 const Todo = ({ todo, refetch }) => {
   const [openEdit, setOpenEdit] = useState(false);
-  const { write: toggleWrite, isPending: toggling } = useWriteTodo();
-  const { write: deleteTodo, isPending: deleting } = useWriteTodo();
+  const {
+    write: toggleWrite,
+    isPending: toggling,
+    hash: toggleHash,
+  } = useWriteTodo();
+  const {
+    write: deleteTodo,
+    isPending: deleting,
+    hash: deleteHash,
+  } = useWriteTodo();
+
+  const [newHash, setNewHash] = useState("");
+  const { data: transaction, dataUpdatedAt } = useTransactionReceipt({
+    hash: deleteHash,
+  });
+
+  const { data: toggleTransaction, dataUpdatedAt: toggleDataUpdatedAt } =
+    useTransactionReceipt({
+      hash: toggleHash,
+    });
+
+  useEffect(() => {
+    if (deleteHash && transaction?.transactionHash && dataUpdatedAt) {
+      handleTransaction({
+        ...transaction,
+        dataUpdatedAt,
+        funcName: "removeTodo",
+      });
+    }
+  }, [deleteHash, transaction?.transactionHash, dataUpdatedAt]);
+
+  useEffect(() => {
+    if (
+      toggleHash &&
+      toggleTransaction?.transactionHash &&
+      toggleDataUpdatedAt
+    ) {
+      handleTransaction({
+        ...toggleTransaction,
+        dataUpdatedAt: toggleDataUpdatedAt,
+        funcName: "toggleComplete",
+      });
+    }
+  }, [toggleHash, toggleTransaction?.transactionHash, toggleDataUpdatedAt]);
+
 
   const handleDelete = async (_id) => {
     const res = await deleteTodo("removeTodo", [_id], "Remove successfully");
-    if (res) {
-      refetch();
-    }
+    setNewHash(res);
+    refetch();
   };
 
   const toggleTodo = async (_id) => {
@@ -25,9 +69,8 @@ const Todo = ({ todo, refetch }) => {
       [_id],
       todo.completed ? "Incomplete todo" : "Completed todo"
     );
-    if (res) {
-      refetch();
-    }
+    setNewHash(res);
+    refetch();
   };
 
   return (
@@ -72,7 +115,13 @@ const Todo = ({ todo, refetch }) => {
                 </>
               </Button>
             </DialogTrigger>
-            {openEdit && <UpdateTodo setOpenEdit={setOpenEdit}  refetch={refetch} todo={todo} />}
+            {openEdit && (
+              <UpdateTodo
+                setOpenEdit={setOpenEdit}
+                refetch={refetch}
+                todo={todo}
+              />
+            )}
           </Dialog>
 
           <Button
