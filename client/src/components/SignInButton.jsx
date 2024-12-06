@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 
 import { useSessionStore } from "@/store";
 
+
 const SignInButton = () => {
   const { openConnectModal } = useConnectModal();
   const { address, isConnected, isDisconnected } = useAccount();
@@ -16,14 +17,11 @@ const SignInButton = () => {
 
   const chainId = useChainId();
 
-
   const {
     nonce: storeNonce,
     setNonce,
     setError,
     setLoading,
-    loading,
-    error,
     setAuth,
     auth,
   } = useSessionStore((state) => state);
@@ -34,14 +32,51 @@ const SignInButton = () => {
     }
   }, [isConnected, !storeNonce, !auth]);
 
+
+  console.log(isConnected && !storeNonce && !auth)
+
   useEffect(() => {
-    if (isDisconnected) {
-      setNonce(null);
-      setAuth(null);
-      setLoading(false);
-      setError(null);
+    if (isDisconnected && Boolean(auth) && Boolean(storeNonce)) {
+      handleLogOut();
     }
-  }, [isDisconnected]);
+  }, [isDisconnected, Boolean(auth), Boolean(storeNonce)]);
+
+  // Fetch user when:
+  useEffect(() => {
+    const handler = async () => {
+      try {
+        const res = await fetch(`${baseAPI}/auth/me`, {
+          method: "GET",
+          credentials: "include",
+        });
+        const json = await res.json();
+        setAuth(json.address);
+        setNonce(null)
+      } catch (_error) {}
+    };
+    // 1. page loads
+    handler();
+
+    // 2. window is focused (in case user logs out of another window)
+    window.addEventListener("focus", handler);
+    return () => window.removeEventListener("focus", handler);
+  }, []);
+
+  const handleLogOut = async () => {
+    await fetch(`${baseAPI}/auth/logout`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    await disconnectAsync();
+    +setNonce(null);
+    setAuth(null);
+    setLoading(false);
+    setError(null);
+  };
 
   async function getMessage(address, statement) {
     try {
@@ -55,6 +90,7 @@ const SignInButton = () => {
       });
 
       const nonce = await res.text();
+      console.log({nonce})
       setNonce(nonce);
 
       const message = new SiweMessage({
@@ -75,8 +111,8 @@ const SignInButton = () => {
   const signInWithEthereum = async () => {
     try {
       if (!isConnected) {
-       const res = openConnectModal?.(); // Trigger the wallet connect modal if not connected
-       console.log({res})
+        openConnectModal?.(); // Trigger the wallet connect modal if not connected
+
         return;
       }
 
@@ -115,9 +151,8 @@ const SignInButton = () => {
       // onSuccess({ address })
     } catch (error) {
       console.error(error.message);
-      toast.error(error.message)
+      toast.error(error.message);
       await disconnectAsync();
-
       setNonce(null);
       setLoading(false);
       setError(error);

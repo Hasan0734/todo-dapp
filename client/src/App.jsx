@@ -6,13 +6,38 @@ import AddTodo from "./components/AddTodo";
 import { useReadTodo } from "./hooks/useTodo";
 import { Loader2 } from "lucide-react";
 import { Button } from "./components/ui/button";
-import { useSession } from "./components/ContextProvider";
 import { useSessionStore } from "./store";
+import { ScrollArea } from "./components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "./components/ui/select";
+import { useState } from "react";
+import { Input } from "./components/ui/input";
 
 function App() {
-  const { status, address } = useAccount();
+  const { status } = useAccount();
   const { data: todos, isPending, refetch } = useReadTodo("getTodos");
   const { loading, auth } = useSessionStore((state) => state);
+  const [selected, setSelected] = useState("All");
+  const [filtered, setFiltered] = useState(todos || []);
+
+  const handleSelect = (value) => {
+    setSelected(value);
+
+    if (value === "All") {
+      console.log(value);
+      setFiltered(todos);
+      return;
+    }
+    const filter = todos.filter((todo) => todo.completed === value);
+    setFiltered(filter);
+  };
 
   if (status === "connecting") {
     return (
@@ -23,7 +48,6 @@ function App() {
       </div>
     );
   }
-
   return (
     <>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -53,16 +77,44 @@ function App() {
                   </div>
                 ) : (
                   <>
+                    <div className="flex justify-between gap-7 items-center">
+                      <div className="whitespace-nowrap">
+                        Total : {filtered?.length}
+                      </div>
+                      <Input
+                        type="text"
+                        value={""}
+                        onChange={(e) => console.log(e)}
+                        placeholder="Add a new todo"
+                        className=" rounded-full"
+                      />
+                      <Select
+                        onValueChange={handleSelect}
+                        defaultValue={selected}
+                      >
+                        <SelectTrigger className="w-[130px]">
+                          <SelectValue placeholder="" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={"All"}>All</SelectItem>
+                          <SelectItem value={true}>Completed</SelectItem>
+                          <SelectItem value={false}>Incomplete</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
                     {todos?.length > 0 && (
-                      <ul className="space-y-3">
-                        {[...todos]?.reverse().map((todo) => (
-                          <Todo
-                            todo={todo}
-                            key={Number(todo.id)}
-                            refetch={refetch}
-                          />
-                        ))}
-                      </ul>
+                      <ScrollArea className="h-72 pr-5">
+                        <ul className="space-y-3">
+                          {[...filtered]?.reverse().map((todo) => (
+                            <Todo
+                              todo={todo}
+                              key={Number(todo.id)}
+                              refetch={refetch}
+                            />
+                          ))}
+                        </ul>
+                      </ScrollArea>
                     )}
 
                     {!todos?.length && (

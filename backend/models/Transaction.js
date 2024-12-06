@@ -32,22 +32,22 @@ const transactionSchema = new mongoose.Schema({
       message: `Is not a valid Ethereum address.`,
     },
   },
-  value: {
-    type: String,
-    required: true,
-    validate: {
-      validator: (value) => {
-        try {
-          const bigNumberValue = BigInt(value); // Ensure the value is a valid BigInt (used for WEI)
-          return bigNumberValue >= 0; // Value should be non-negative
-        } catch {
-          return false; // Not a valid number
-        }
-      },
-      message: (props) =>
-        `${props.value} is not a valid Ethereum transaction value.`,
-    },
-  },
+  // value: {
+  //   type: String,
+  //   required: true,
+  //   validate: {
+  //     validator: (value) => {
+  //       try {
+  //         const bigNumberValue = BigInt(value); // Ensure the value is a valid BigInt (used for WEI)
+  //         return bigNumberValue >= 0; // Value should be non-negative
+  //       } catch {
+  //         return false; // Not a valid number
+  //       }
+  //     },
+  //     message: (props) =>
+  //       `${props.value} is not a valid Ethereum transaction value.`,
+  //   },
+  // },
   gasUsed: {
     type: String,
     validate: {
@@ -67,6 +67,10 @@ const transactionSchema = new mongoose.Schema({
     unique: true,
     required: true,
     min: [0, "Block number must be a non-negative integer."],
+  },
+  functionName: {
+    type: String,
+    required: true,
   },
   timestamp: {
     type: Date,
